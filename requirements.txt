@@ -1,0 +1,10 @@
+kafka-python
+pandas
+numpy
+scikit-learn
+tensorflow
+matplotlib
+streamlit
+influxdb-client
+pytest
+flake8
