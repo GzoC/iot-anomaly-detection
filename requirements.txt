@@ -8,3 +8,4 @@ streamlit
 influxdb-client
 pytest
 flake8
+pyspark
