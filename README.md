@@ -77,7 +77,6 @@ anomaly-detection-iot/
 
 ## 🔜 Próximos pasos
 
-- Implementar simulador de datos IoT.
 - Desarrollar scripts para ingesta en Kafka.
 - Desarrollar pipeline streaming.
 - Entrenar e integrar modelos de ML.
