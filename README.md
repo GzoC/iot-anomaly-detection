@@ -77,7 +77,6 @@ anomaly-detection-iot/
 
 ## 🔜 Próximos pasos
 
-- Desarrollar pipeline streaming.
 - Entrenar e integrar modelos de ML.
 - Desarrollar Dashboard en tiempo real.
 - Automatización CI/CD.
