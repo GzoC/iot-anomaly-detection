@@ -1,4 +1,4 @@
-# Detección de Anomalías en Tiempo Real para IoT y Sistemas de Producción
+8# Detección de Anomalías en Tiempo Real para IoT y Sistemas de Producción
 
 Este proyecto está orientado a implementar un sistema robusto para detectar anomalías en tiempo real utilizando datos provenientes de dispositivos IoT (Internet of Things). Utiliza procesamiento de streaming, técnicas avanzadas de Machine Learning, visualización interactiva y prácticas de MLOps.
 
@@ -77,6 +77,7 @@ anomaly-detection-iot/
 
 ## 🔜 Próximos pasos
 
+-
 - Entrenar e integrar modelos de ML.
 - Desarrollar Dashboard en tiempo real.
 - Automatización CI/CD.
