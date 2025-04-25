@@ -80,7 +80,7 @@ anomaly-detection-iot/
 - Entrenar e integrar modelos de ML.
 - Desarrollar Dashboard en tiempo real.
 - Automatización CI/CD.
--
+
 ---
 
 ## 📄 Licencia
