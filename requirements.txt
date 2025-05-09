@@ -5,6 +5,10 @@ kafka-python
 pandas
 numpy
 
+sqlalchemy
+psycopg2-binary
+
+
 # Machine Learning
 scikit-learn
 tensorflow
