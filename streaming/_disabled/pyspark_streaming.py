@@ -1,5 +1,4 @@
 """
-    #(DISABLE)
     # pyspark_streaming.py
     # -----------------------------------------------------------
     # Este script implementa un ejemplo básico de "Structured Streaming"
