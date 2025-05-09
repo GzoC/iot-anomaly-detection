@@ -1,20 +1,25 @@
-# consumer_pipeline.py
+# streaming/consumer_pipeline.py
 
-import time                                      # Para manejar intervalos y pausas
-import json                                      # Para parsear mensajes JSON de Kafka
-from kafka import KafkaConsumer                  # Cliente Kafka en Python
-import pandas as pd                              # Para crear DataFrames y procesarlos
-from sqlalchemy import create_engine             # Para conectar y escribir en la base de datos
+import time                        # Para manejar intervalos y pausas
+import json                        # Para parsear mensajes JSON de Kafka
+import os                          # Para leer variables de entorno
+from kafka import KafkaConsumer     # Cliente Kafka en Python
+import pandas as pd                # Para crear DataFrames y procesarlos
+from sqlalchemy import create_engine
+from dotenv import load_dotenv     # Para cargar .env
 
 # ——————————————————————————————————————————————————————————————————————————
-# 1. CONFIGURACIÓN
+# 1. CARGA DE VARIABLES DE ENTORNO
 # ——————————————————————————————————————————————————————————————————————————
-KAFKA_BOOTSTRAP_SERVERS = ['localhost:9092']     # Dirección del broker Kafka
-KAFKA_TOPIC = 'iot_sensor_data'                  # Tópico donde el simulador publica
-BATCH_INTERVAL = 5                               # Duración de cada ventana (en segundos)
-DB_CONNECTION_STRING = (                           # Cadena de conexión a PostgreSQL
-    'postgresql://usuario:password@localhost:5432/iotdb'
-)
+# Carga las variables definidas en el archivo .env ubicado en la raíz del proyecto
+env_path = os.path.join(os.path.dirname(__file__), os.pardir, '.env')
+load_dotenv(dotenv_path=env_path)
+
+# Obtener valores del entorno
+KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS').split(',')
+KAFKA_TOPIC = os.getenv('KAFKA_TOPIC')
+BATCH_INTERVAL = int(os.getenv('BATCH_INTERVAL', '5'))
+DB_CONNECTION_STRING = os.getenv('DB_CONNECTION_STRING')
 
 # ——————————————————————————————————————————————————————————————————————————
 # 2. FUNCIÓN PRINCIPAL
@@ -28,36 +33,32 @@ def main():
 
     # 2.1 Crear consumidor Kafka
     consumer = KafkaConsumer(
-        KAFKA_TOPIC,                             # Tópico a suscribir
+        KAFKA_TOPIC,
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-        value_deserializer=lambda m: json.loads(m.decode('utf-8')),  # Deserializar JSON
-        auto_offset_reset='latest',             # Leer solo nuevos mensajes
-        enable_auto_commit=True,                # Confirmar offsets automáticamente
-        group_id='iot-consumer-group'           # ID de grupo para coordinar consumidores
+        value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+        auto_offset_reset='latest',
+        enable_auto_commit=True,
+        group_id=os.getenv('KAFKA_CONSUMER_GROUP', 'iot-consumer-group')
     )
 
     # 2.2 Crear motor de base de datos
     engine = create_engine(DB_CONNECTION_STRING)
 
-    buffer = []                                 # Lista temporal para acumular mensajes
-    last_flush = time.time()                    # Marca de tiempo de la última escritura
+    buffer = []                                # Lista temporal para mensajes
+    last_flush = time.time()                   # Marca de tiempo de la última escritura
 
     # 2.3 Bucle infinito de consumo
     for message in consumer:
-        buffer.append(message.value)            # Añadir el mensaje al buffer
+        buffer.append(message.value)
 
-        # 2.4 Cuando supera el intervalo definido, procesar el batch
+        # 2.4 Procesar batch cuando expire la ventana
         if time.time() - last_flush >= BATCH_INTERVAL:
-            # 2.4.1 Convertir buffer en DataFrame de pandas
-            df = pd.DataFrame(buffer)
+            df = pd.DataFrame(buffer)          # 2.4.1 Convertir buffer a DataFrame
 
-            # 2.4.2 Limpieza de datos: eliminar filas con valores nulos
-            df = df.dropna()
+            df = df.dropna()                   # 2.4.2 Eliminar valores nulos
+            df['timestamp'] = pd.to_datetime(df['timestamp'])  # 2.4.3 Convertir timestamp
 
-            # 2.4.3 Conversión de tipos: timestamp a datetime
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
-
-            # 2.4.4 Agregaciones por sensor (media de cada métrica)
+            # 2.4.4 Agregación por sensor
             aggregated = df.groupby('sensor_id').agg({
                 'temperature': 'mean',
                 'vibration': 'mean',
@@ -65,19 +66,18 @@ def main():
                 'voltage': 'mean'
             }).reset_index()
 
-            # 2.4.5 Escribir batch agregado en la tabla 'sensor_metrics'
+            # 2.4.5 Escritura en la tabla 'sensor_metrics'
             aggregated.to_sql(
                 'sensor_metrics',
                 engine,
-                if_exists='append',               # Añadir registros sin borrar existentes
-                index=False                       # No escribir índice como columna
+                if_exists='append',
+                index=False
             )
 
             print(f"Escritos {len(aggregated)} registros en la base de datos")
 
-            # 2.4.6 Resetear buffer y actualizar marca de tiempo
-            buffer = []
-            last_flush = time.time()
+            buffer = []                        # 2.4.6 Limpieza del buffer
+            last_flush = time.time()          # Actualizar marca de tiempo
 
 if __name__ == '__main__':
     main()  # Ejecutar la función principal
