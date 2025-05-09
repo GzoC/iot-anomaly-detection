@@ -1,11 +1,24 @@
+# Conector Kafka para Python
 kafka-python
+
+# Procesamiento y análisis de datos
 pandas
 numpy
+
+# Machine Learning
 scikit-learn
 tensorflow
+
+# Visualización
 matplotlib
 streamlit
+
+# Cliente InfluxDB (para futuros almacenamientos de series)
 influxdb-client
+
+# Testing y calidad de código
 pytest
 flake8
+
+# Streaming con Spark (si decides retomar PySpark en otro entorno)
 pyspark
