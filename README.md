@@ -1,90 +1,119 @@
-# Detección de Anomalías en Tiempo Real para IoT y Sistemas de Producción
+# IoT Anomaly Detection Pipeline
 
-Este proyecto está orientado a implementar un sistema robusto para detectar anomalías en tiempo real utilizando datos provenientes de dispositivos IoT (Internet of Things). Utiliza procesamiento de streaming, técnicas avanzadas de Machine Learning, visualización interactiva y prácticas de MLOps.
-
-## 📌 Objetivos del Proyecto
-
-- Implementar un pipeline de ingesta y procesamiento de datos en tiempo real.
-- Aplicar modelos avanzados de Machine Learning para detectar anomalías en tiempo real.
-- Crear un dashboard interactivo para visualizar anomalías y estados críticos.
-- Automatizar todo el flujo con Docker y Kubernetes.
-- Integrar prácticas modernas de CI/CD mediante GitHub Actions.
+Este proyecto implementa un pipeline de detección de anomalías en tiempo real para datos provenientes de sensores IoT utilizando Apache Spark y Kafka. El pipeline está diseñado para integrarse con una base de datos PostgreSQL y realizar procesamiento distribuido eficiente.
 
 ---
 
-## 🛠️ Arquitectura Técnica
+## 📁 Estructura del Proyecto
 
-- **Kafka (Broker):** Recepción y gestión de streaming.
-- **Spark Streaming (Procesamiento):** Limpieza, transformación, y agregación de datos.
-- **ML Models (Python):** Isolation Forest, Autoencoders, LSTM para detección.
-- **InfluxDB o PostgreSQL:** Almacenamiento y auditoría de datos.
-- **Dashboard:** Visualización en tiempo real con Grafana o Streamlit.
-- **Docker/Kubernetes:** Despliegue escalable de componentes.
-- **GitHub Actions:** Automatización del flujo CI/CD.
+```
+iot-anomaly-detection/
+├── data/                   # Datos de ejemplo
+├── streaming/              # Scripts de streaming
+│   ├── producer.py         # Envia datos simulados a Kafka
+│   └── consumer_pipeline.py# Consume y procesa los datos desde Kafka
+├── src/                    # Módulos auxiliares
+│   ├── preprocessing.py    # Limpieza y preprocesamiento de datos
+│   ├── anomaly.py          # Detección de anomalías
+│   ├── database.py         # Funciones para conexión a base de datos
+│   └── config.py           # Configuraciones generales y .env
+├── .env                    # Variables de entorno
+├── requirements.txt        # Dependencias del proyecto
+├── README.md               # Este archivo
+└── run_pipeline.bat        # Script de ejecución automatizada en Windows
+```
 
 ---
 
-## 🚀 Instalación y Configuración Inicial
+## ⚙️ Requisitos
 
-### 1. Clonar repositorio:
+- Python >= 3.9
+- Apache Spark 3.5.5
+- Kafka instalado y corriendo en localhost:9092
+- PostgreSQL local (puede ser Docker)
+- winutils.exe (para compatibilidad Hadoop en Windows)
 
+---
+
+## 🔌 Instalación
+
+1. **Clona el repositorio:**
 ```bash
-git clone https://github.com/GzoC/anomaly-detection-iot.git
-cd anomaly-detection-iot
+git clone https://github.com/GzoC/iot-anomaly-detection.git
+cd iot-anomaly-detection
 ```
 
-### 2. Crear entorno virtual Python:
-
+2. **Crea el entorno virtual:**
 ```bash
-python -m venv venv
-# Activar entorno virtual
-source venv/bin/activate  # Linux/macOS
-.\venv\Scripts\activate   # Windows
+python -m venv .venv_iotanomalydetection
+.venv_iotanomalydetection\Scripts\activate
 ```
 
-### 3. Instalar dependencias:
-
+3. **Instala las dependencias:**
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Iniciar Kafka con Docker:
+4. **Configura variables de entorno:**
+Crea un archivo `.env` y agrega:
+```ini
+KAFKA_TOPIC=topic-iot
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+DB_CONNECTION_STRING=postgresql+psycopg2://usuario:contraseña@localhost:5432/nombre_db
+```
 
+5. **Instala winutils (solo en Windows):**
+- Descarga desde: https://github.com/cdarlint/winutils
+- Copia `winutils.exe` a `D:/hadoop/hadoop-3.3.5/bin/`
+- Establece variables de entorno:
 ```bash
-cd docker
-docker-compose up -d
+$env:HADOOP_HOME="D:\hadoop\hadoop-3.3.5"
+$env:PATH += ";D:\hadoop\hadoop-3.3.5\bin"
 ```
 
 ---
 
-## 📂 Estructura del Proyecto
+## 🚀 Ejecución
 
+### 1. Iniciar Kafka (desde otra consola):
+```bash
+bin\windows\zookeeper-server-start.bat config\zookeeper.properties
+bin\windows\kafka-server-start.bat config\server.properties
 ```
-anomaly-detection-iot/
-├── data/
-├── simulator/
-├── streaming/
-├── model/
-├── dashboard/
-├── docker/
-├── tests/
-├── docs/
-├── requirements.txt
-└── README.md
+
+### 2. Enviar datos simulados a Kafka:
+```bash
+python streaming/producer.py
+```
+
+### 3. Procesar datos desde Kafka y detectar anomalías:
+```bash
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.1 streaming/pyspark_streaming.py
+```
+
+### 4. Verifica resultados en la base de datos PostgreSQL.
+
+---
+
+## 📌 Notas adicionales
+
+- Si ocurre un error con Hadoop en Windows, asegúrate que `winutils.exe` esté correctamente ubicado.
+- La variable `PYSPARK_PYTHON` debe apuntar al ejecutable de Python de tu entorno virtual.
+```powershell
+$env:PYSPARK_PYTHON="D:\gzo\myProjects\dataAnalyst\projects\iot-anomaly-detection\.venv_iotanomalydetection\Scripts\python.exe"
 ```
 
 ---
 
-## 🔜 Próximos pasos
+## 🧑‍💻 Autor
 
-- Entrenar e integrar modelos de ML.
-- Desarrollar Dashboard en tiempo real.
-- Automatización CI/CD.
--
+Proyecto desarrollado por **Gonzalo Cisterna Salinas** como parte de su portafolio profesional.
+
+GitHub: [GzoC](https://github.com/GzoC)  
+Correo: cisternasalinasg@gmail.com
 
 ---
 
-## 📄 Licencia
+## 📜 Licencia
 
-Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
-
+Este proyecto se publica bajo la licencia MIT.
