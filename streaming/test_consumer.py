@@ -1,25 +1,27 @@
 # streaming/test_consumer.py
-
+# -*- coding: utf-8 -*-
 """
-Script para consumir mensajes desde el tópico Kafka 'iot_sensor_data' y mostrarlos por consola.
+Script para consumir mensajes del tópico Kafka 'iot_sensor_data'
+y mostrarlos por consola.
 
-Creado por Gonzalo Cisterna Salinas - Proyecto IoT con Kafka y PySpark
+Creado por Gonzalo Cisterna Salinas - github.com/GzoC
 """
-
-# streaming/test_consumer.py
 
 from kafka import KafkaConsumer
 import json
 
+# Creamos el consumidor de Kafka
 consumer = KafkaConsumer(
-    'iot_sensor_data',
-    bootstrap_servers='localhost:9092',
-    auto_offset_reset='earliest',  # <-- Esta línea es clave
-    enable_auto_commit=True,
-    group_id='iot-group',
-    value_serializer=lambda m: json.loads(m.decode('utf-8'))
+    'iot_sensor_data',                      # Tópico al que se suscribe
+    bootstrap_servers='localhost:9092',     # Dirección del broker de Kafka
+    auto_offset_reset='earliest',           # Comienza desde el inicio del tópico
+    enable_auto_commit=True,                # Kafka guardará automáticamente el desplazamiento
+    group_id='iot-test-group-1',            # ID del grupo de consumidores (puedes cambiarlo si no ves mensajes)
+    value_deserializer=lambda m: json.loads(m.decode('utf-8'))  # Deserializa los mensajes de JSON
 )
 
-print("Esperando mensajes...")
+print("🟢 Esperando mensajes del tópico 'iot_sensor_data'...")
+
+# Loop infinito para escuchar mensajes
 for message in consumer:
-    print(f"Mensaje recibido: {message.value}")
+    print(f"📩 Mensaje recibido: {message.value}")
