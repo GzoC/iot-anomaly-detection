@@ -1,28 +1,19 @@
-# Conector Kafka para Python
-kafka-python
+# Requerimientos principales para IoT Anomaly Detection Pipeline
 
-# Procesamiento y análisis de datos
-pandas
-numpy
+# Procesamiento de datos
+pyspark==3.3.1
+pandas==2.2.2
+numpy==1.26.4
 
-sqlalchemy
-psycopg2-binary
+# Conexión con PostgreSQL
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.29
 
+# Manejo de entorno y configuración
+python-dotenv==1.0.1
 
-# Machine Learning
-scikit-learn
-tensorflow
+# Simulación y generación de datos
+faker==24.9.0
 
-# Visualización
-matplotlib
-streamlit
-
-# Cliente InfluxDB (para futuros almacenamientos de series)
-influxdb-client
-
-# Testing y calidad de código
-pytest
-flake8
-
-# Streaming con Spark (si decides retomar PySpark en otro entorno)
-pyspark
+# Kafka client para Python
+kafka-python==2.0.2
